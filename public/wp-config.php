@@ -136,7 +136,7 @@ define( 'WP_CONTENT_URL', WP_HOME . '/content' );
 
 // Since you can have multiple installations in one database, you need a unique
 // prefix.
-$table_prefix  = 'wp_why86m2tj3_';
+$table_prefix  = 'wp_';
 
 // Default PHP settings.
 ini_set('session.gc_probability', 1);
