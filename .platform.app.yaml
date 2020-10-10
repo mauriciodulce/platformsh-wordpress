@@ -1,0 +1,117 @@
+# This file describes an application. You can have multiple applications
+# in the same project.
+variables:
+    env:
+        # Update these for your desired NVM and Node versions.
+        NVM_VERSION: v0.35.2
+        NODE_VERSION: 12
+# The name of this app. Must be unique within a project.
+name: app
+
+# The runtime the application uses.
+type: "php:7.4"
+
+
+runtime:
+    # Enable the redis extension so Drupal can communicate with the Redis cache.
+    extensions:
+        - redis
+        - gd
+        - gettext
+        - mbstring
+        
+# Configuration of the build of the application.
+build:
+    flavor: composer
+
+hooks:
+    build: |
+            curl -sS https://platform.sh/cli/installer | php
+            set -e
+            curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+            php wp-cli.phar --info
+            chmod +x wp-cli.phar
+            mv wp-cli.phar wp
+            unset NPM_CONFIG_PREFIX
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/$NVM_VERSION/install.sh | dash
+            export NVM_DIR="$PLATFORM_APP_DIR/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm current
+            nvm install $NODE_VERSION
+            
+# The relationships of the application with services or other applications.
+# The left-hand side is the name of the relationship as it will be exposed
+# to the application in the PLATFORM_RELATIONSHIPS variable. The right-hand
+# side is in the form `<service name>:<endpoint name>`.
+relationships:
+    database: 'db:mysql'
+    rediscache: 'cacheredis:redis'
+    essearch: 'searchelastic:elasticsearch'
+# The configuration of app when it is exposed to the web.
+web:
+    locations:
+        "/":
+            # The public directory of the app, relative to its root.
+            root: "public"
+            # The front-controller script to send non-static requests to.
+            passthru: "/index.php"
+            # Wordpress has multiple roots (wp-admin) so the following is required
+            index:
+                - "index.php"
+            # The number of seconds whitelisted (static) content should be cached.
+            expires: 600
+            scripts: true
+            allow: true
+            rules:
+                ^/composer\.json:
+                    allow: false
+                ^/license\.txt$:
+                    allow: false
+                ^/readme\.html$:
+                    allow: false
+        "/content/cache":
+            root: "public/content/cache"
+            scripts: false
+            allow: false
+        "/content/uploads":
+            root: "public/content/uploads"
+            scripts: false
+            allow: true
+
+# The size of the persistent disk of the application (in MB).
+disk: 1024
+dependencies:
+    php:
+        wp-cli/wp-cli: "^2.4.1"
+        psy/psysh: "^0.10.4"
+    nodejs:
+        yarn: "*"
+    
+
+# The mounts that will be performed when the package is deployed.
+mounts:
+    "public/content/cache":
+        source: local
+        source_path: "cache"
+    "public/content/uploads":
+        source: local
+        source_path: "uploads"
+    "public/content/languages":
+        source: local
+        source_path: "languages"
+    "public/content/mu-plugins":
+        source: local
+        source_path: "mu-plugins"
+    
+crons:
+    # Run Drupal's cron tasks every 19 minutes.
+    wpcli:
+        spec: '*/1 * * * *'
+        cmd: 'cd public; /app/wp cron event run --due-now >/dev/null 2>&1'
+    backup:
+        spec: '0 5 * * *'
+        cmd: |
+            if [ "$PLATFORM_BRANCH" = master ]; then
+                platform backup:create --yes --no-wait
+            fi
+

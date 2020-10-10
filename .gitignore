@@ -1,0 +1,46 @@
+# Ignore local configuration files.
+/.env
+/wp-config-local.php
+
+# Ignore Composer packages.
+/vendor/
+/node_modules
+# Temporary and build directories.
+/_www
+
+# Application
+public/content/plugins/*
+!public/content/plugins/.gitkeep
+public/content/mu-plugins/*/
+public/content/upgrade
+public/content/uploads/*
+!public/content/uploads/.gitkeep
+
+# WordPress
+public/wp
+public/.htaccess
+
+# Logs
+*.log
+
+# Dotenv
+.env
+.env.*
+!.env.example
+
+# Composer
+/vendor
+
+# Plugins 
+!public/content/plugins/wp-migrate-db-pro
+!public/content/plugins/wp-migrate-db-pro-cli
+!public/content/plugins/wp-migrate-db-pro-media-files
+!public/content/plugins/wpml-multilingual-cms
+!public/content/plugins/gravityforms
+# WP-CLI
+wp-cli.local.yml
+.DS_Store
+*--dump.sql
+database.sql.gz
+public/wp-config-local.php
+wp

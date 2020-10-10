@@ -1,0 +1,39 @@
+# The name given to the Elasticsearch service (lowercase alphanumeric only).
+searchelastic:
+    # The type of your service (elasticsearch), which uses the format
+    # 'type:version'. Be sure to consult the Elasticsearch documentation
+    # (https://docs.platform.sh/configuration/services/elasticsearch.html#supported-versions)
+    # when choosing a version. If you specify a version number which is not available,
+    # the CLI will return an error.
+    type: elasticsearch:7.7
+    # The disk attribute is the size of the persistent disk (in MB) allocated to the service.
+    disk: 1024
+
+# The name given to the MariaDB service (lowercase alphanumeric only).
+db:
+    # The type of your service (mysql), which uses the format
+    # 'type:version'. Be sure to consult the MariaDB documentation
+    # (https://docs.platform.sh/configuration/services/mysql.html#supported-versions)
+    # when choosing a version. If you specify a version number which is not available,
+    # the CLI will return an error.
+    type: mysql:10.4
+    # The disk attribute is the size of the persistent disk (in MB) allocated to the service.
+    disk: 1024
+
+# The name given to the Redis service (lowercase alphanumeric only).
+cacheredis:
+    # The type of your service (redis), which uses the format
+    # 'type:version'. Be sure to consult the Redis documentation
+    # (https://docs.platform.sh/configuration/services/redis.html#supported-versions)
+    # when choosing a version. If you specify a version number which is not available,
+    # the CLI will return an error.
+    type: redis:6.0
+
+varnish:
+    type: varnish:6.0
+    relationships:
+        application: 'app:http'
+    configuration:
+        vcl: !include
+            type: string
+            path: config.vcl
